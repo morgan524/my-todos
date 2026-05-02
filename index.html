@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks</title>
+  <style>
+    :root {
+      --primary:   #4F46E5;
+      --primary-lt:#EEF2FF;
+      --overdue:   #EF4444;
+      --overdue-lt:#FEF2F2;
+      --today:     #D97706;
+      --today-lt:  #FFFBEB;
+      --done:      #10B981;
+      --bg:        #F3F4F6;
+      --card:      #FFFFFF;
+      --border:    #E5E7EB;
+      --text:      #111827;
+      --muted:     #6B7280;
+      --radius:    10px;
+      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    a { color: var(--primary); }
+
+    /* ── MODALS ─────────────────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(17,24,39,.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500;
+      backdrop-filter: blur(3px);
+    }
+    .modal {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      width: min(92vw, 460px);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header { margin-bottom: 6px; }
+    .modal-header h2 { font-size: 1.35rem; font-weight: 700; }
+    .modal-sub { color: var(--muted); font-size: .88rem; margin-bottom: 24px; line-height: 1.55; }
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 5px; letter-spacing: .02em; }
+    .form-row input {
+      width: 100%; padding: 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: .93rem;
+      outline: none; transition: border-color .18s;
+      background: var(--card); color: var(--text);
+    }
+    .form-row input:focus { border-color: var(--primary); }
+    .form-hint { font-size: .76rem; color: var(--muted); margin-top: 4px; }
+    .btn {
+      padding: 10px 18px; border-radius: 8px; border: none;
+      cursor: pointer; font-size: .9rem; font-weight: 600;
+      transition: all .18s; display: inline-flex;
+      align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; width: 100%; justify-content: center; margin-top: 6px; }
+    .btn-primary:hover { background: #4338CA; }
+    .btn-secondary {
+      background: transparent; color: var(--muted);
+      border: 1.5px solid var(--border); flex: 1;
+    }
+    .btn-secondary:hover { background: var(--bg); color: var(--text); }
+    .btn-row { display: flex; gap: 10px; margin-top: 6px; }
+    .hidden { display: none !important; }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .logo {
+      font-size: 1.05rem; font-weight: 700; color: var(--primary);
+      display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 15px; font-weight: 700; flex-shrink: 0;
+    }
+    .logo-text { font-size: 1rem; }
+    .view-toggle {
+      display: flex; gap: 2px;
+      background: var(--bg);
+      border-radius: 9px; padding: 3px;
+      border: 1px solid var(--border);
+    }
+    .view-btn {
+      padding: 5px 14px; border-radius: 7px;
+      border: none; background: transparent;
+      cursor: pointer; font-size: .82rem; font-weight: 600;
+      color: var(--muted); transition: all .15s;
+    }
+    .view-btn.active {
+      background: var(--card); color: var(--text);
+      box-shadow: var(--shadow);
+    }
+    .header-right { display: flex; align-items: center; gap: 6px; }
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 17px; transition: all .15s;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--text); }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────── */
+    main { max-width: 700px; margin: 0 auto; padding: 22px 14px 60px; }
+
+    /* ── SECTION HEADERS ─────────────────────────────────── */
+    .section { margin-bottom: 24px; }
+    .section-hd {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .section-label {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--muted);
+    }
+    .section-pill {
+      background: var(--bg); color: var(--muted);
+      border-radius: 99px; padding: 1px 8px;
+      font-size: .72rem; font-weight: 700;
+    }
+    .sec-overdue .section-label { color: var(--overdue); }
+    .sec-overdue .section-pill   { background: var(--overdue-lt); color: var(--overdue); }
+    .sec-today .section-label    { color: var(--today); }
+    .sec-today .section-pill     { background: var(--today-lt); color: var(--today); }
+
+    /* ── TASK CARD ───────────────────────────────────────── */
+    .task-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      display: flex; align-items: flex-start; gap: 11px;
+      margin-bottom: 7px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .task-card:hover { border-color: #D1D5DB; box-shadow: var(--shadow); }
+    .task-card.is-overdue { border-left: 3px solid var(--overdue); }
+    .task-card.is-today   { border-left: 3px solid var(--today); }
+    .task-card.is-done    { opacity: .52; }
+
+    .check-ring {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #fff; cursor: pointer; flex-shrink: 0;
+      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; font-size: 11px; color: #fff;
+    }
+    .check-ring:hover { border-color: var(--primary); }
+    .is-done .check-ring {
+      background: var(--done); border-color: var(--done);
+    }
+    .task-body { flex: 1; min-width: 0; }
+    .task-title {
+      font-size: .93rem; font-weight: 500; word-break: break-word;
+    }
+    .is-done .task-title { text-decoration: line-through; }
+    .task-notes {
+      font-size: .81rem; color: var(--muted);
+      margin-top: 3px; line-height: 1.45;
+    }
+    .task-meta { display: flex; align-items: center; gap: 7px; margin-top: 6px; flex-wrap: wrap; }
+    .date-badge {
+      font-size: .74rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .badge-overdue { background: var(--overdue-lt); color: var(--overdue); }
+    .badge-today   { background: var(--today-lt);   color: var(--today); }
+    .badge-future  { background: var(--primary-lt); color: var(--primary); }
+    .badge-none    { background: var(--bg);          color: var(--muted); }
+    .pri-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pri-high   { background: var(--overdue); }
+    .pri-medium { background: #F59E0B; }
+    .pri-low    { background: var(--muted); }
+
+    /* ── EMPTY STATE ─────────────────────────────────────── */
+    .empty-wrap {
+      text-align: center; padding: 64px 20px;
+    }
+    .empty-icon { font-size: 3.2rem; margin-bottom: 14px; }
+    .empty-wrap h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 7px; }
+    .empty-wrap p  { color: var(--muted); font-size: .88rem; max-width: 320px; margin: 0 auto; line-height: 1.6; }
+    .email-chip {
+      display: inline-block;
+      background: var(--primary-lt); color: var(--primary);
+      border-radius: 99px; padding: 3px 12px;
+      font-size: .82rem; font-weight: 600; margin: 10px 0 0;
+    }
+
+    /* ── CALENDAR ────────────────────────────────────────── */
+    .cal-nav {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 14px;
+    }
+    .cal-month { font-size: 1.05rem; font-weight: 700; }
+    .cal-arrow {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1.5px solid var(--border); background: var(--card);
+      cursor: pointer; font-size: 15px; transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-arrow:hover { background: var(--bg); }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7,1fr);
+      gap: 1px; background: var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .cal-dow {
+      background: var(--card); text-align: center;
+      padding: 7px 0;
+      font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted);
+    }
+    .cal-cell {
+      background: var(--card); min-height: 78px;
+      padding: 7px; cursor: pointer; transition: background .12s;
+      position: relative;
+    }
+    .cal-cell:hover { background: #F9FAFB; }
+    .cal-cell.other-mo { background: #FAFAFA; }
+    .cal-cell.cal-today { background: var(--primary-lt); }
+    .cal-cell.cal-selected { outline: 2px solid var(--primary); outline-offset: -2px; }
+    .cal-num {
+      font-size: .78rem; font-weight: 600; color: var(--muted);
+      margin-bottom: 3px; line-height: 1;
+    }
+    .cal-today .cal-num {
+      background: var(--primary); color: #fff;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+    }
+    .cal-chip {
+      font-size: .67rem; border-radius: 4px;
+      padding: 1px 5px; margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: var(--primary-lt); color: var(--primary); font-weight: 500;
+    }
+    .cal-chip.chip-od  { background: var(--overdue-lt); color: var(--overdue); }
+    .cal-chip.chip-done { opacity: .45; text-decoration: line-through; }
+
+    /* ── DAY PANEL ───────────────────────────────────────── */
+    .day-panel {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px; margin-top: 14px;
+    }
+    .day-panel-title {
+      font-size: .95rem; font-weight: 700; margin-bottom: 12px;
+    }
+
+    /* ── STATUS TOAST ────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #1F2937; color: #fff;
+      padding: 9px 20px; border-radius: 99px;
+      font-size: .84rem; box-shadow: var(--shadow-lg);
+      z-index: 999; opacity: 0;
+      transition: opacity .22s, transform .22s;
+      pointer-events: none; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.toast-err { background: var(--overdue); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 580px) {
+      header { padding: 0 12px; }
+      main { padding: 14px 10px 60px; }
+      .logo-text { display: none; }
+      .cal-cell { min-height: 58px; padding: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     SETUP MODAL (first run)
+═════════════════════════════════════════════════════════ -->
+<div id="setup-overlay" class="overlay">
+  <div class="modal">
+    <div class="modal-header"><h2>👋 Welcome to My Tasks</h2></div>
+    <p class="modal-sub">
+      Your tasks are stored in a <strong>tasks.json</strong> file in your GitHub repo.
+      Enter your repo details below — you only do this once.
+    </p>
+    <div class="form-row">
+      <label>GitHub Username</label>
+      <input id="s-owner" type="text" placeholder="your-username" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Repository Name</label>
+      <input id="s-repo" type="text" placeholder="my-todos" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Branch</label>
+      <input id="s-branch" type="text" placeholder="main" value="main" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Personal Access Token</label>
+      <input id="s-pat" type="password" placeholder="ghp_…" autocomplete="off">
+      <div class="form-hint">
+        Needs <strong>Contents: Read &amp; Write</strong> on this repo.
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create one here →</a>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSetup()">Connect &amp; Open My Tasks →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     SETTINGS MODAL
+═════════════════════════════════════════════════════════ -->
+<div id="settings-overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-header"><h2>⚙️ Settings</h2></div>
+    <p class="modal-sub">Update your GitHub connection.</p>
+    <div class="form-row">
+      <label>GitHub Username</label>
+      <input id="cfg-owner" type="text" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Repository Name</label>
+      <input id="cfg-repo" type="text" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Branch</label>
+      <input id="cfg-branch" type="text" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label>Personal Access Token</label>
+      <input id="cfg-pat" type="password" autocomplete="off">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" style="margin-top:0;flex:1;justify-content:center" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN APP
+═════════════════════════════════════════════════════════ -->
+<div id="app" class="hidden">
+
+  <header>
+    <div class="logo">
+      <div class="logo-mark">✓</div>
+      <span class="logo-text">My Tasks</span>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-list"     onclick="switchView('list')">☰ List</button>
+      <button class="view-btn"        id="btn-calendar" onclick="switchView('calendar')">📅 Calendar</button>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="refresh-btn" onclick="refreshTasks()" title="Refresh (auto-refreshes every 30 s)">
+        <span id="refresh-icon">↻</span>
+      </button>
+      <button class="icon-btn" onclick="openSettings()" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LIST VIEW -->
+    <div id="list-view">
+      <div id="task-list"></div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div id="calendar-view" class="hidden">
+      <div class="cal-nav">
+        <button class="cal-arrow" onclick="shiftMonth(-1)">&#8592;</button>
+        <div class="cal-month" id="cal-title"></div>
+        <button class="cal-arrow" onclick="shiftMonth(1)">&#8594;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="day-panel" class="hidden"></div>
+    </div>
+  </main>
+</div>
+
+<!-- toast -->
+<div id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  STATE & CONFIG                                          ║
+// ╚══════════════════════════════════════════════════════════╝
+let cfg = {};
+let tasks = [];
+let view = 'list';
+let calMonth = new Date();   // displayed month
+let selectedDay = null;
+let refreshTimer = null;
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  INIT                                                    ║
+// ╚══════════════════════════════════════════════════════════╝
+function init() {
+  try { cfg = JSON.parse(localStorage.getItem('todo_cfg') || '{}'); } catch(e) { cfg = {}; }
+
+  if (!cfg.owner || !cfg.repo || !cfg.pat) {
+    show('setup-overlay');
+  } else {
+    show('app');
+    hide('setup-overlay');
+    loadTasks();
+    refreshTimer = setInterval(loadTasks, 30_000);
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  SETUP / SETTINGS                                        ║
+// ╚══════════════════════════════════════════════════════════╝
+function saveSetup() {
+  const owner  = val('s-owner');
+  const repo   = val('s-repo');
+  const branch = val('s-branch') || 'main';
+  const pat    = val('s-pat');
+  if (!owner || !repo || !pat) { toast('Please fill in all fields', true); return; }
+  cfg = { owner, repo, branch, pat };
+  persist();
+  hide('setup-overlay');
+  show('app');
+  loadTasks();
+  refreshTimer = setInterval(loadTasks, 30_000);
+}
+
+function openSettings() {
+  set('cfg-owner',  cfg.owner  || '');
+  set('cfg-repo',   cfg.repo   || '');
+  set('cfg-branch', cfg.branch || 'main');
+  set('cfg-pat',    cfg.pat    || '');
+  show('settings-overlay');
+}
+function closeSettings() { hide('settings-overlay'); }
+
+function saveSettings() {
+  const owner  = val('cfg-owner');
+  const repo   = val('cfg-repo');
+  const branch = val('cfg-branch') || 'main';
+  const pat    = val('cfg-pat');
+  if (!owner || !repo || !pat) { toast('Please fill in all fields', true); return; }
+  cfg = { owner, repo, branch, pat };
+  persist();
+  closeSettings();
+  loadTasks();
+}
+
+function persist() { localStorage.setItem('todo_cfg', JSON.stringify(cfg)); }
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  GITHUB API                                              ║
+// ╚══════════════════════════════════════════════════════════╝
+async function loadTasks() {
+  const icon = document.getElementById('refresh-icon');
+  icon.className = 'spin';
+  try {
+    // raw URL bypasses API rate limits and needs no auth for public repos;
+    // cache-bust with timestamp
+    const url = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/tasks.json?t=${Date.now()}`;
+    const r = await fetch(url);
+    if (r.status === 404) {
+      tasks = [];        // file not created yet — that's fine
+    } else if (!r.ok) {
+      throw new Error(`HTTP ${r.status}`);
+    } else {
+      const data = await r.json();
+      tasks = Array.isArray(data.tasks) ? data.tasks : [];
+    }
+    render();
+  } catch(e) {
+    toast(`Could not load tasks: ${e.message}`, true);
+  } finally {
+    icon.className = '';
+  }
+}
+
+async function getFileSha() {
+  const r = await fetch(
+    `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/tasks.json`,
+    { headers: ghHeaders() }
+  );
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`SHA fetch failed: ${r.status}`);
+  return (await r.json()).sha;
+}
+
+async function writeTasks() {
+  const sha = await getFileSha();
+  const body = {
+    message: 'Update tasks via My Tasks app',
+    content: b64(JSON.stringify({ tasks }, null, 2)),
+    branch: cfg.branch
+  };
+  if (sha) body.sha = sha;
+
+  const r = await fetch(
+    `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/tasks.json`,
+    { method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body) }
+  );
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${r.status}`);
+  }
+}
+
+function ghHeaders() {
+  return {
+    'Authorization': `Bearer ${cfg.pat}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  TASK OPERATIONS                                         ║
+// ╚══════════════════════════════════════════════════════════╝
+async function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  t.done  = !t.done;
+  t.doneAt = t.done ? new Date().toISOString() : null;
+  render();   // optimistic
+  try {
+    await writeTasks();
+    toast(t.done ? '✓ Marked complete' : 'Reopened task');
+  } catch(e) {
+    // revert
+    t.done = !t.done; t.doneAt = t.done ? new Date().toISOString() : null;
+    render();
+    toast(`Save failed: ${e.message}`, true);
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  DATE HELPERS                                            ║
+// ╚══════════════════════════════════════════════════════════╝
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+};
+const pad = n => String(n).padStart(2, '0');
+
+function friendlyDate(ds) {
+  if (!ds) return 'No due date';
+  const t = todayISO();
+  if (ds === t) return 'Today';
+  const tom = new Date(); tom.setDate(tom.getDate() + 1);
+  const tmStr = `${tom.getFullYear()}-${pad(tom.getMonth()+1)}-${pad(tom.getDate())}`;
+  if (ds === tmStr) return 'Tomorrow';
+  const d = new Date(ds + 'T00:00:00');
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: sameYear ? undefined : 'numeric' });
+}
+
+function taskGroup(t) {
+  if (!t.dueDate) return 'later';
+  const today = todayISO();
+  if (t.dueDate < today) return 'overdue';
+  if (t.dueDate === today) return 'today';
+  const wk = new Date(); wk.setDate(wk.getDate() + 7);
+  if (new Date(t.dueDate + 'T00:00:00') <= wk) return 'week';
+  return 'later';
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  RENDER                                                  ║
+// ╚══════════════════════════════════════════════════════════╝
+function render() {
+  if (view === 'list') renderList();
+  else renderCalendar();
+}
+
+/* ── LIST VIEW ──────────────────────────────────────────── */
+function renderList() {
+  const el = document.getElementById('task-list');
+  const active = tasks.filter(t => !t.done);
+  const done   = tasks.filter(t => t.done);
+
+  if (!tasks.length) {
+    const addr = cfg.owner ? `${cfg.owner.toLowerCase().slice(0,6)}+todo@gmail.com` : 'you+todo@gmail.com';
+    el.innerHTML = `<div class="empty-wrap">
+      <div class="empty-icon">📬</div>
+      <h3>No tasks yet</h3>
+      <p>Send an email to your todo address to add a task.<br>The subject + body are parsed by AI.</p>
+      <div class="email-chip">📧 you+todo@gmail.com</div>
+    </div>`;
+    return;
+  }
+
+  const buckets = {
+    overdue: { label: 'Overdue', cls: 'sec-overdue', items: [] },
+    today:   { label: 'Today',   cls: 'sec-today',   items: [] },
+    week:    { label: 'This Week', cls: '',           items: [] },
+    later:   { label: 'Later',    cls: '',            items: [] },
+  };
+
+  for (const t of active) {
+    buckets[taskGroup(t)].items.push(t);
+  }
+  for (const b of Object.values(buckets)) {
+    b.items.sort((a,b) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return a.dueDate.localeCompare(b.dueDate);
+    });
+  }
+
+  let html = '';
+  for (const [key, b] of Object.entries(buckets)) {
+    if (!b.items.length) continue;
+    html += `<div class="section ${b.cls}">
+      <div class="section-hd">
+        <span class="section-label">${b.label}</span>
+        <span class="section-pill">${b.items.length}</span>
+      </div>
+      ${b.items.map(t => cardHTML(t, key)).join('')}
+    </div>`;
+  }
+
+  if (done.length) {
+    const shown = done.slice(0, 12);
+    html += `<div class="section">
+      <div class="section-hd">
+        <span class="section-label">Completed</span>
+        <span class="section-pill">${done.length}</span>
+      </div>
+      ${shown.map(t => cardHTML(t, 'done')).join('')}
+      ${done.length > 12 ? `<p style="text-align:center;color:var(--muted);font-size:.8rem;padding:8px 0">… and ${done.length - 12} more</p>` : ''}
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function cardHTML(t, group) {
+  const isDone    = t.done;
+  const isOverdue = group === 'overdue';
+  const isToday   = group === 'today';
+
+  let cardCls = 'task-card';
+  if (isDone)    cardCls += ' is-done';
+  if (isOverdue) cardCls += ' is-overdue';
+  if (isToday)   cardCls += ' is-today';
+
+  let badgeCls = 'date-badge ';
+  if (isOverdue)     badgeCls += 'badge-overdue';
+  else if (isToday)  badgeCls += 'badge-today';
+  else if (t.dueDate)badgeCls += 'badge-future';
+  else               badgeCls += 'badge-none';
+
+  const priCls = t.priority === 'high' ? 'pri-high' : t.priority === 'low' ? 'pri-low' : 'pri-medium';
+
+  return `<div class="${cardCls}">
+    <div class="check-ring" onclick="toggleTask('${esc(t.id)}')">${isDone ? '✓' : ''}</div>
+    <div class="task-body">
+      <div class="task-title">${esc(t.title)}</div>
+      ${t.notes ? `<div class="task-notes">${esc(t.notes)}</div>` : ''}
+      <div class="task-meta">
+        <span class="${badgeCls}">${friendlyDate(t.dueDate)}</span>
+        ${t.priority ? `<span class="pri-dot ${priCls}" title="Priority: ${t.priority}"></span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── CALENDAR VIEW ──────────────────────────────────────── */
+function renderCalendar() {
+  const yr = calMonth.getFullYear();
+  const mo = calMonth.getMonth();
+  document.getElementById('cal-title').textContent =
+    calMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Build date → tasks map
+  const byDate = {};
+  for (const t of tasks) {
+    if (t.dueDate) (byDate[t.dueDate] = byDate[t.dueDate] || []).push(t);
+  }
+
+  const firstDow  = new Date(yr, mo, 1).getDay();
+  const daysInMo  = new Date(yr, mo+1, 0).getDate();
+  const todayStr  = todayISO();
+
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    .map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  for (let i = 0; i < firstDow; i++)
+    html += `<div class="cal-cell other-mo"></div>`;
+
+  for (let d = 1; d <= daysInMo; d++) {
+    const ds = `${yr}-${pad(mo+1)}-${pad(d)}`;
+    const dayTasks = byDate[ds] || [];
+    const isT = ds === todayStr;
+    const isSel = ds === selectedDay;
+    const isPast = ds < todayStr;
+
+    const chips = dayTasks.slice(0, 3).map(t => {
+      let cls = 'cal-chip';
+      if (t.done)   cls += ' chip-done';
+      else if (isPast) cls += ' chip-od';
+      return `<div class="${cls}">${esc(t.title)}</div>`;
+    }).join('');
+    const more = dayTasks.length > 3
+      ? `<div style="font-size:.63rem;color:var(--muted)">+${dayTasks.length-3}</div>` : '';
+
+    html += `<div class="cal-cell ${isT ? 'cal-today' : ''} ${isSel ? 'cal-selected' : ''}"
+                  onclick="pickDay('${ds}')">
+      <div class="cal-num">${d}</div>
+      ${chips}${more}
+    </div>`;
+  }
+
+  // pad remainder
+  const filled = firstDow + daysInMo;
+  const tail   = (7 - (filled % 7)) % 7;
+  for (let i = 0; i < tail; i++)
+    html += `<div class="cal-cell other-mo"></div>`;
+
+  document.getElementById('cal-grid').innerHTML = html;
+
+  if (selectedDay) renderDayPanel(selectedDay, byDate[selectedDay] || []);
+}
+
+function pickDay(ds) {
+  if (selectedDay === ds) { selectedDay = null; hide('day-panel'); }
+  else {
+    selectedDay = ds;
+    const byDate = {};
+    for (const t of tasks) if (t.dueDate) (byDate[t.dueDate] = byDate[t.dueDate] || []).push(t);
+    renderDayPanel(ds, byDate[ds] || []);
+    show('day-panel');
+  }
+  renderCalendar();
+}
+
+function renderDayPanel(ds, dayTasks) {
+  const d = new Date(ds + 'T00:00:00');
+  const title = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  const panel = document.getElementById('day-panel');
+
+  panel.innerHTML = `<div class="day-panel">
+    <div class="day-panel-title">${title} · ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''}</div>
+    ${dayTasks.length
+      ? dayTasks.map(t => cardHTML(t, taskGroup(t))).join('')
+      : `<p style="color:var(--muted);font-size:.88rem">No tasks due this day.</p>`
+    }
+  </div>`;
+}
+
+function shiftMonth(dir) {
+  calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + dir, 1);
+  selectedDay = null;
+  hide('day-panel');
+  renderCalendar();
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  VIEW SWITCHING                                          ║
+// ╚══════════════════════════════════════════════════════════╝
+function switchView(v) {
+  view = v;
+  document.getElementById('list-view').classList.toggle('hidden', v !== 'list');
+  document.getElementById('calendar-view').classList.toggle('hidden', v !== 'calendar');
+  document.getElementById('btn-list').classList.toggle('active', v === 'list');
+  document.getElementById('btn-calendar').classList.toggle('active', v === 'calendar');
+  render();
+}
+
+async function refreshTasks() { await loadTasks(); toast('Refreshed ↻'); }
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  TOAST                                                   ║
+// ╚══════════════════════════════════════════════════════════╝
+let _toastTimer;
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = `show${err ? ' toast-err' : ''}`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.className = '', 3200);
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  TINY DOM HELPERS                                        ║
+// ╚══════════════════════════════════════════════════════════╝
+const $  = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+const val  = id => $(id).value.trim();
+const set  = (id, v) => $(id).value = v;
+const esc  = s => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// safe base64 encode for unicode strings
+function b64(str) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+}
+
+// ── GO ──
+init();
+</script>
+</body>
+</html>
