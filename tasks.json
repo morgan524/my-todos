@@ -1,3 +1,64 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "id": "87fc4668-65f8-49c0-9f44-70bc3b78001a",
+      "title": "Security alert",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-02T13:27:14.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Security alert"
+    },
+    {
+      "id": "5cadbb3c-9252-4404-9cc4-0e08b4429e3b",
+      "title": "Security alert",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-02T13:49:21.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Security alert"
+    },
+    {
+      "id": "b0d11cb2-1457-4466-ad0e-2351ca66b71f",
+      "title": "Security alert",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-02T13:49:35.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Security alert"
+    },
+    {
+      "id": "8a651a01-c07a-4e1e-b5ca-a2af6b94e5e0",
+      "title": "Security alert",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-02T14:09:13.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Security alert"
+    },
+    {
+      "id": "95375445-9612-4166-b704-8309701f24aa",
+      "title": "✅ Morgan, review your Google Account settings for your new account",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-02T13:54:19.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "✅ Morgan, review your Google Account settings for your new account"
+    }
+  ]
 }
