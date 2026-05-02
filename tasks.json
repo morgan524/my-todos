@@ -31,8 +31,8 @@
       "dueDate": null,
       "priority": "medium",
       "createdAt": "2026-05-02T13:49:35.000Z",
-      "done": false,
-      "doneAt": null,
+      "done": true,
+      "doneAt": "2026-05-02T14:19:36.483Z",
       "source": "email",
       "emailSubject": "Security alert"
     },
