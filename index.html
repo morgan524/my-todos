@@ -201,6 +201,25 @@
     .pri-high   { background: var(--overdue); }
     .pri-medium { background: #F59E0B; }
     .pri-low    { background: var(--muted); }
+    .email-btn {
+      font-size: .73rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 99px; border: 1.5px solid var(--border);
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .15s; line-height: 1.6;
+    }
+    .email-btn:hover { background: var(--bg); color: var(--text); border-color: #D1D5DB; }
+    .email-body {
+      margin-top: 10px; padding: 10px 12px;
+      background: var(--bg); border-radius: 7px;
+      font-size: .81rem; color: var(--muted);
+      line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+      border: 1px solid var(--border);
+    }
+    .email-subject {
+      font-size: .78rem; font-weight: 600; color: var(--text);
+      margin-bottom: 6px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
 
     /* ── EMPTY STATE ─────────────────────────────────────── */
     .empty-wrap {
@@ -685,6 +704,7 @@ function cardHTML(t, group) {
 
   const priCls = t.priority === 'high' ? 'pri-high' : t.priority === 'low' ? 'pri-low' : 'pri-medium';
 
+  const hasEmail = !!(t.emailBody || t.emailSubject);
   return `<div class="${cardCls}">
     <div class="check-ring" onclick="toggleTask('${esc(t.id)}')">${isDone ? '✓' : ''}</div>
     <div class="task-body">
@@ -693,6 +713,13 @@ function cardHTML(t, group) {
       <div class="task-meta">
         <span class="${badgeCls}">${friendlyDate(t.dueDate)}</span>
         ${t.priority ? `<span class="pri-dot ${priCls}" title="Priority: ${t.priority}"></span>` : ''}
+        ${hasEmail ? `<button class="email-btn" onclick="toggleEmail('${esc(t.id)}')">📧 Email</button>` : ''}
+      </div>
+      <div id="email-${esc(t.id)}" class="hidden">
+        <div class="email-body">
+          ${t.emailSubject ? `<div class="email-subject">Subject: ${esc(t.emailSubject)}</div>` : ''}
+          ${esc(t.emailBody || '(no body saved)')}
+        </div>
       </div>
     </div>
   </div>`;
@@ -829,6 +856,12 @@ const esc  = s => String(s)
 // safe base64 encode for unicode strings
 function b64(str) {
   return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+}
+
+function toggleEmail(id) {
+  const el = document.getElementById('email-' + id);
+  if (!el) return;
+  el.classList.toggle('hidden');
 }
 
 // ── GO ──
