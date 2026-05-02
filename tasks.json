@@ -55,8 +55,8 @@
       "dueDate": null,
       "priority": "medium",
       "createdAt": "2026-05-02T13:54:19.000Z",
-      "done": false,
-      "doneAt": null,
+      "done": true,
+      "doneAt": "2026-05-02T14:19:38.735Z",
       "source": "email",
       "emailSubject": "✅ Morgan, review your Google Account settings for your new account"
     }
