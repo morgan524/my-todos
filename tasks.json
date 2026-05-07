@@ -111,6 +111,19 @@
       "source": "email",
       "emailSubject": "Summary of failures for Google Apps Script: Untitled project",
       "emailBody": "Your script, Untitled project, has recently failed to finish successfully. A summary of the failure(s) is shown below. To configure the triggers for this script, or change your setting for receiving future failure notifications, click here. Start Function Error Message Trigger End 5/4/26 10:01:20 AM MDT main Exception: Limit Exceeded: Gmail. time-based 5/4/26 10:01:21 AM MDT Sincerely, Google Apps Script Need help? Visit the Google Apps Script documentation. Please do not reply to this message. (c) 2026 Google"
+    },
+    {
+      "id": "a7079bbd-dd28-43a7-ab6a-b67af1603fe5",
+      "title": "State Farm Payment Declined",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-07T20:59:03.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Fwd: State Farm Payment Declined",
+      "emailBody": "Sent from my iPhone 510-928-5454 Begin forwarded message: > From: Morgan Smith <morgancsmith99@gmail.com> > Date: May 7, 2026 at 2:33:28 PM MDT > To: Jill Baldwin <jill.baldwin.ddv3@statefarm.com> > Subject: Re: State Farm Payment Declined > > We had our checking account closed with fraud. Ill update the new account shortly . > > Sent from my iPhone > 510-928-5454 > >>> On May 7, 2026, at 1:13 PM, Jill Baldwin <jill.baldwin.ddv3@statefarm.com> wrote: >>> >> >> Morgan, >> >> I’m sending a friendly reminder that your recent insurance payment did not process. This could have been due to new billing information, insufficient funds, or another reason from your bank. When you have a chance, please make a payment online or give us a call and we will take a payment and update our records. >> >> Thank you, >> >> Jill Baldwin >> Adam Hancock State Farm Insurance >> 16367 S. Townsend Ave Suite 5 >> Montrose, CO 81401 >> 970-249-7551 >> >>"
     }
   ]
 }
