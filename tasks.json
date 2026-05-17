@@ -176,6 +176,19 @@
       "source": "email",
       "emailSubject": "Google updated your settings",
       "emailBody": "[image: Google] Hi Morgan, we updated your settings mcsevents99@gmail.com Google couldn’t confirm you're an adult, so some account settings have changed Check it out <https://accounts.google.com/AccountChooser?Email=mcsevents99@gmail.com&continue=https://myaccount.google.com/check-settings?cfc%3D1%26rfn%3D1778935956000> SafeSearch is on Google may hide explicit content, like pornography, from your search results Personalized ads are off Google won’t show you personalized ads Timeline is off Timeline won’t automatically save your visits and routes anymore Are you an adult? Verify your age <https://accounts.google.com/AccountChooser?Email=mcsevents99@gmail.com&continue=https://myaccount.google.com/age-verification?avl%3D2%26p%3D7%26rfn%3D1778935956000> and choose the settings that are right for you You received this email to let you know about important changes to your Google Account and services. © 2026 Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA"
+    },
+    {
+      "id": "4ef3baf2-5836-430c-bc78-b0c8c1d0a6bf",
+      "title": "Summary of failures for Google Apps Script: Untitled project",
+      "notes": "",
+      "dueDate": null,
+      "priority": "medium",
+      "createdAt": "2026-05-17T10:21:30.000Z",
+      "done": false,
+      "doneAt": null,
+      "source": "email",
+      "emailSubject": "Summary of failures for Google Apps Script: Untitled project",
+      "emailBody": "Your script, Untitled project, has recently failed to finish successfully. A summary of the failure(s) is shown below. To configure the triggers for this script, or change your setting for receiving future failure notifications, click here. Summary: Error Message Count Exception: Service invoked too many times for one day: gmail. 2 Start Function Error Message Trigger End 5/16/26 4:21:20 AM MDT main Exception: Service invoked too many times for one day: gmail. time-based 5/16/26 4:21:30 AM MDT 5/16/26 10:06:20 AM MDT main Exception: Service invoked too many times for one day: gmail. time-based 5/16/26 10:06:29 AM MDT Sincerely, Google Apps Script Need help? Visit the Google Apps Script documentation. Please do not reply to this message. (c) 2026 Google"
     }
   ]
 }
